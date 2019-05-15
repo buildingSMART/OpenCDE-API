@@ -1,0 +1,54 @@
+User->Client Tool: Open file
+Client Tool->CDE: Request to browse files
+CDE->Client Tool: Selected references
+
+note over Client Tool,CDE: callback_url&selected_reference_URL={ref_url}
+note over Client Tool,CDE: {ref_url} is encoded ?standard?
+note over Client Tool,CDE: {ref_url} is a persistent URL
+
+Client Tool->CDE: GET {ref_url}
+CDE->Client Tool: Reference Payload
+
+note over Client Tool,CDE:
+{
+    "reference_URL": {reference_URL}, -> self reference
+    "content_URL": {content_URL},
+    "metadata_URL": {metadata_URL},
+    "versions_URL": {versions_URL},
+    
+    "version": string, -> can take any form, but UNIQUE, IMMUTABLE
+    "version_date": ISO date,
+    "title": string, -> human readable title
+    "file_description": {
+        "size_in_bytes": number,
+        "name": string, -> original name of the file
+    }
+}
+end note
+
+Client Tool->CDE: GET {metadata_URL}
+CDE->Client Tool: Metadata Payload
+note over Client Tool,CDE:
+{
+    Human Consumable {Key, Value}, {Key, [Value*]} pairs
+}
+end note
+
+
+Client Tool->CDE: GET {content_URL}
+CDE->Client Tool: Binary data
+
+note over Client Tool,CDE:
+Header contains MIME type
+Body contains the binary data
+end note
+
+Client Tool->CDE: GET {versions_URL}
+CDE->Client Tool: Binary data
+
+note over Client Tool,CDE:
+Versions Payload
+{
+    [] : array of 'Reference Payload', ascending order
+}
+end note

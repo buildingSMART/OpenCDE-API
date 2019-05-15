@@ -1,0 +1,28 @@
+User->Client Tool: Save new file
+Client Tool->CDE: POST cde/documents/upload/
+CDE->Client Tool: Upload Payload
+
+note over Client Tool,CDE:
+{
+    "upload_URL": {upload_URL},
+    "metadata_URL": {metadata_URL}
+}
+end note
+
+Client Tool->CDE: POST {upload_url}
+note over Client Tool,CDE: Body contains binary content
+
+Client Tool->CDE: Open {metadata_url} <- this happens in the browser
+note over Client Tool,CDE:
+callback_URL is transmitted from the client
+to the CDE via query parameter
+end note
+
+User->CDE: Create metadata for new document
+note over Client Tool,CDE: Metadata is created at CDE side
+
+CDE->Client Tool: Reference to new documents
+note over Client Tool,CDE: callback_url&created_reference_URL={ref_url}
+note over Client Tool,CDE: {ref_url} is persistent URL of the document
+
+Client Tool->User: Upload completed
