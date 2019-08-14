@@ -1,0 +1,142 @@
+openapi: "3.0"
+
+info:
+  version: 0.1
+  title: OpenCDE document API
+  description: An attempt at formalising the OpenCDE document API
+  contact:
+    name: Nick Tindall
+    url: "https://github.com/buildingSMART/OpenCDE-API"
+    email: nick.tindall@oracle.com
+
+paths:
+  /cde/0.1/documents/select-documents:
+    get:
+      operationId: selectDocumentsUIEntrypoint
+      summary: Start the select documents flow
+      parameters:
+        - name: select_mode
+          in: query
+          description: Start selection UI in single or multi select mode
+          schema:
+            type: string
+            oneOf:
+              - single
+              - multi
+        - name: callback_url
+          in: query
+          description: The callback URL to call with the selected URLs, can contain parameters which must be preserved
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: The select file(s) UI
+          content:
+              text/html:
+                schema:
+                  type: string
+                  format: binary
+          
+  /unspecified/this-is-not-a-standard-path/some-id:
+    get:
+      operationId: getDocumentReference
+      responses:
+        "200":
+          description: The document reference payload
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/DocumentReference'
+
+  /unspecified/this-is-not-a-standard-path/some-id/metadata:
+    get:
+      operationId: getDocumentMetadata
+      responses:
+        "200":
+          description: The document metadata
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/DocumentMetadata'
+
+  /unspecified/this-is-not-a-standard-path/some-id/versions:
+      get:
+        operationId: getDocumentVersions
+        responses:
+          "200":
+            description: The file references of all available document versions, in ascending version order
+            content:
+              application/hal+json:
+                schema:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/DocumentReference'
+
+components:
+  schemas:
+    HALLink:
+      type: object
+      properties:
+        href:
+          type: string
+          description: The URL to the linked resource, can be relative
+      required: ['href']
+
+    DocumentReference:
+      type: object
+      properties:
+        _links:
+          description: Links to related resources
+          type: object
+          properties:
+            self:
+              description: A link to retrieve this reference (must not be relative)
+              $ref: '#/components/schemas/HALLink'
+            metatada:
+              description: A link to the metadata for this document
+              $ref: '#/components/schemas/HALLink'
+            versions:
+              description: A link to the list of versions of this document that are available
+              $ref: '#/components/schemas/HALLink'
+            content:
+              description: A link to the document contents
+              $ref: '#/components/schemas/HALLink'
+        version:
+          type: string
+          description: The version string for this version of the document
+        version_date:
+          type: string
+          format: dateTime
+          description: The timestamp of when this documents was created in the CDE
+        title:
+          type: string
+          description: A human readable string representing the document
+        file_description:
+          type: object
+          properties:
+            size_in_bytes: 
+              type: integer
+              description: The size of the document in bytes
+            name:
+              type: string
+              description: The original file name of the document
+          required: ['size_in_bytes']
+      required: ['_links', 'version', 'version_date', 'title', 'file_description']
+
+    DocumentMetadata:
+      type: object
+      properties:
+        _links:
+          description: Links to related resources
+          type: object
+          properties:
+            self:
+              description: A link to retrieve this metadata (must not be relative)
+              $ref: '#/components/schemas/HALLink'
+            documentReference:
+              description: A link to the document reference this metadata belongs to
+              $ref: '#/components/schemas/HALLink'
+      required: ['_links']
+      additionalProperties:
+        type: string
