@@ -100,7 +100,7 @@ Generally, these response codes shall be used in the API:
 
 ## 1.6 Error Response Body Format
 
-BCI APIs have a specified error response body format [error.json](Schemas_draft-03/error.json).
+BCI APIs have a specified error response body format [error.json](schemas/error.json).
 
 ## 1.7 DateTime Format
 
@@ -189,7 +189,7 @@ In such cases, files should be sent with the following Http headers:
 
 ## 2.1 Versions Service
 
-[versions_GET.json](Schemas_draft-03/Public/versions_GET.json)
+[versions_GET.json](schemas/versions_GET.json)
 
 **Resource URL (public resource)**
 
@@ -231,7 +231,7 @@ Returns a list of all supported BSI API versions of the server.
 
 ### 2.2.1 Obtaining Authentication Information
 
-[auth_GET.json](Schemas_draft-03/Authentication/auth_GET.json)
+[auth_GET.json](schemas/auth_GET.json)
 
 Authentication is based on the [OAuth 2.0 Protocol](http://tools.ietf.org/html/draft-ietf-oauth-v2-22).
 
@@ -285,9 +285,9 @@ An example for the OAuth2 Authorization Grant workflow [can be found here](OAuth
 
 ### 2.2.3 OAuth2 Protocol Flow - Dynamic Client Registration
 
-[dynRegClient\_POST.json](Schemas_draft-03/Authentication/dynRegClient_POST.json)
+[dynRegClient\_POST.json](schemas/dynRegClient_POST.json)
 
-[dynRegClient\_GET.json](Schemas_draft-03/Authentication/dynRegClient_GET.json)
+[dynRegClient\_GET.json](schemas/dynRegClient_GET.json)
 
 The following part describes the optional dynamic registration process of a client. BSI API Servers may offer additional processes registering clients, for example allowing a client application developer to register his client on the servers website.
 
@@ -332,7 +332,7 @@ JSON encoded body using the `application/json` content type.
 
 ### 2.3.1 Get current user
 
-[user_GET.json](Schemas_draft-03/User/user_GET.json)
+[user_GET.json](schemas/user_GET.json)
 
 **Resource URL**
 
