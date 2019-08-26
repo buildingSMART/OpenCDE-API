@@ -1,0 +1,12 @@
+{
+    "$schema": "http://json-schema.org/draft-03/schema#",
+    "title": "Error",
+    "description": "Schema for error, BSI REST APIs.",
+    "type": "object",
+    "properties": {
+        "message": {
+            "type": "string",
+            "required": true
+        }
+    }
+}
