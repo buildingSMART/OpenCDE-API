@@ -19,11 +19,8 @@
   * [1.5 Http Status Codes](#15-http-status-codes)
   * [1.6 Error Response Body Format](#16-error-response-body-format)
   * [1.7 DateTime Format](#17-datetime-format)
-  * [1.8 Authorization](#18-authorization)
-    + [1.8.1 Per-Entity Authorization](#181-per-entity-authorization)
-    + [1.8.2 Determining Authorized Entity Actions](#182-determining-authorized-entity-actions)
-  * [1.9 Additional Response and Request Object Properties](#19-additional-response-and-request-object-properties)
-  * [1.10 Binary File Uploads](#110-binary-file-uploads)
+  * [1.8 Additional Response and Request Object Properties](#18-additional-response-and-request-object-properties)
+  * [1.9 Binary File Uploads](#19-binary-file-uploads)
 - [2. Public Services](#2-public-services)
   * [2.1 Versions Service](#21-versions-service)
   * [2.2 Authentication Services](#22-authentication-services)
@@ -109,70 +106,12 @@ DateTime values in this API are supposed to be in ISO 8601 compliant `YYYY-MM-DD
 For example, `2016-04-28T16:31:12.270+02:00` would represent _Thursday, April 28th, 2016, 16:31:12 (270ms) with a time zone offset of +2 hours relative to UTC._
 Please note that the colon in the timezone offset is optional, so `+02:00` is equivalent to `+0200`.
 
-## 1.8 Authorization
-
-API implementors can optionally choose to restrict the actions a user is allowed to perform on the applicable entities
-via the API. The global default authorizations for all entities are expressed in the project extensions schema and can
-be locally overridden in the entities themselves.
-
-### 1.8.1 Per-Entity Authorization
-
-Whenever a user requests an update-able entity with the query parameter `includeAuthorization` equal to `true` the
-server should include an `authorization` field in the entity containing any local variations from the global
-authorization defaults for that entity. Using this information clients can decide whether to, for example, include an
-"Edit" button in the UI displaying the entity depending on the actions permitted for the user.
-
-### 1.8.2 Determining Authorized Entity Actions
-
-The client can calculate the available set of actions for a particular entity by taking the project-wide defaults from
-the project extensions, then replacing any keys defined in the entity's `authorization` map with the values specified
-locally. The meaning of each of the authorization keys is outlined in outlined in
-[4.1.5 Expressing User Authorization through Project Extensions](#415-expressing-user-authorization-through-project-extensions).
-
-**Example Scenario (Topic)**
-
-_In the Project Extensions_
-
-    {
-        "topic_actions": [],
-        "topic_status": [
-            "open",
-            "closed",
-            "confirmed"
-        ]
-    }
-
-Indicating that by default:
-
-* no modifications can be made to Topics
-* Topics can be placed in `open`, `closed` or `confirmed` status
-
-_In the Topic_
-
-    {
-        "authorization": {
-            "topic_actions": [
-                "update",
-                "createComment",
-                "createViewpoint"
-            ],
-            "topic_status": [
-                "closed"
-            ]
-        }
-    }
-
-Indicating that for this topic, the current user can:
-
-* update the Topic, or add comments or viewpoints
-* place the Topic into `closed` status
-
-## 1.9 Additional Response and Request Object Properties
+## 1.8 Additional Response and Request Object Properties
 
 All API response and request Json objects may contain additional properties that are not covered by this specification.
 This is to allow server and client implementations freedom to add additional functionality. Servers and clients shall ignore those properties and must not produces errors on additional properties. Servers and clients are not required to preserve these properties.
 
-## 1.10 Binary File Uploads
+## 1.9 Binary File Uploads
 
 Some endpoints in the BSI APIs may expect binary file uploads, such as the BCF Document Service and the BCF BIM Snippet Service.
 
