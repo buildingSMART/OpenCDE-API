@@ -93,7 +93,7 @@ components:
             self:
               description: A link to retrieve this reference (must not be relative)
               $ref: '#/components/schemas/HALLink'
-            metatada:
+            metadata:
               description: A link to the metadata for this document
               $ref: '#/components/schemas/HALLink'
             versions:
