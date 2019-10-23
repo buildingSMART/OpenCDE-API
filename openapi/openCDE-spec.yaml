@@ -61,17 +61,15 @@ paths:
                 $ref: '#/components/schemas/DocumentMetadata'
 
   /unspecified/this-is-not-a-standard-path/some-id/versions:
-      get:
-        operationId: getDocumentVersions
-        responses:
-          "200":
-            description: The file references of all available document versions, in ascending version order
-            content:
-              application/hal+json:
-                schema:
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/DocumentReference'
+    get:
+      operationId: getDocumentVersions
+      responses:
+        "200":
+          description: The file references of all available document versions, in ascending version order
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/DocumentReferenceList'
 
 components:
   schemas:
@@ -140,3 +138,25 @@ components:
       required: ['_links']
       additionalProperties:
         type: string
+
+    DocumentReferenceList:
+      type: object
+      properties:
+        _links:
+          description: Links to related resources
+          type: object
+          properties:
+            self:
+              description: A link to retrieve this reference (must not be relative)
+              $ref: '#/components/schemas/HALLink'
+        _embedded:
+          description: Embedded resources
+          type: object
+          properties:
+            documentReferenceList:
+              description: List of Document References
+              type: array
+              items:
+                $ref: '#/components/schemas/DocumentReference'
+          required: ['documentReferenceList']
+        required: ['_links', '_embedded']
