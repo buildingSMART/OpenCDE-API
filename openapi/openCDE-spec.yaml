@@ -1,7 +1,7 @@
 openapi: "3.0.0"
 
 info:
-  version: 0.1
+  version: "0.1"
   title: OpenCDE document API
   description: An attempt at formalising the OpenCDE document API
   contact:
@@ -20,9 +20,7 @@ paths:
           description: Start selection UI in single or multi select mode
           schema:
             type: string
-            oneOf:
-              - single
-              - multi
+            enum: ['single', 'multi']
         - name: callback_url
           in: query
           description: The callback URL to call with the selected URLs, can contain parameters which must be preserved
