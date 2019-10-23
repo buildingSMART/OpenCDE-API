@@ -1,4 +1,4 @@
-openapi: "3.0"
+openapi: "3.0.0"
 
 info:
   version: 0.1
@@ -159,4 +159,4 @@ components:
               items:
                 $ref: '#/components/schemas/DocumentReference'
           required: ['documentReferenceList']
-        required: ['_links', '_embedded']
+      required: ['_links', '_embedded']
