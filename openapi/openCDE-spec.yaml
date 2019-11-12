@@ -3,15 +3,17 @@ openapi: "3.0.0"
 info:
   version: "0.1"
   title: OpenCDE document API
-  description: An attempt at formalising the OpenCDE document API
+  description: Proposals for OpenCDE document API
   contact:
-    name: Nick Tindall
+    name: Dirk Harbinson
     url: "https://github.com/buildingSMART/OpenCDE-API"
-    email: nick.tindall@oracle.com
+    email: dirk.harbinson@oracle.com
 
 paths:
   /cde/0.1/documents/select-documents:
     get:
+      tags:
+        - OpenCDE Standard API
       operationId: selectDocumentsUIEntrypoint
       summary: Start the select documents flow
       parameters:
@@ -31,13 +33,65 @@ paths:
         "200":
           description: The select file(s) UI
           content:
-              text/html:
-                schema:
-                  type: string
-                  format: binary
-          
-  /unspecified/this-is-not-a-standard-path/some-id:
+            text/html:
+              schema:
+                type: string
+                format: binary
+
+  /cde/0.1/documents/upload-documents:
+    post:
+      tags:
+        - OpenCDE Standard API
+      summary: Start the upload documents flow
+      responses:
+        "200":
+          description: Returns the session links
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/UploadSessionCreatedResponse'
+
+  /<register-file-upload-link>:
+    post:
+      tags:
+        - Upload - Vendor specific URL (discovered via standard API)
+      summary: Register a file to upload
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterFileRequest'
+      responses:
+        "200":
+          description: Returns the links to upload file binary
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/RegisterFileResponse'
+
+  /<upload-file-link>:
+    post:
+      tags:
+        - Upload - Vendor specific URL (discovered via standard API)
+      summary: Upload a file
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UploadDocumentRequest'
+      responses:
+        "200":
+          description: Returns the links to upload file binary
+          content:
+            application/hal+json:
+              schema:
+                $ref: '#/components/schemas/DocumentReference'
+
+  /<document-reference-link>:
     get:
+      summary: Get document reference
+      tags:
+        - Download - Vendor specific URL (discovered via standard API)
       operationId: getDocumentReference
       responses:
         "200":
@@ -47,8 +101,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/DocumentReference'
 
-  /unspecified/this-is-not-a-standard-path/some-id/metadata:
+  /<document-version-metadata-link>:
     get:
+      summary: Get document version metadata
+      tags:
+        - Download - Vendor specific URL (discovered via standard API)
       operationId: getDocumentMetadata
       responses:
         "200":
@@ -58,8 +115,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/DocumentMetadata'
 
-  /unspecified/this-is-not-a-standard-path/some-id/versions:
+  /<document-versions-link>:
     get:
+      summary: Get all versions of a document
+      tags:
+        - Download - Vendor specific URL (discovered via standard API)
       operationId: getDocumentVersions
       responses:
         "200":
@@ -71,13 +131,11 @@ paths:
 
 components:
   schemas:
-    HALLink:
-      type: object
-      properties:
-        href:
-          type: string
-          description: The URL to the linked resource, can be relative
-      required: ['href']
+
+    DocumentVersion:
+      type: string
+      description: 'A unique identifer to a document version on the CDE'
+      example: '793f227a9c2847969b7a845b95eb8a0f'
 
     DocumentReference:
       type: object
@@ -87,17 +145,13 @@ components:
           type: object
           properties:
             self:
-              description: A link to retrieve this reference (must not be relative)
-              $ref: '#/components/schemas/HALLink'
+              $ref: '#/components/schemas/DocumentReferenceLink'
             metadata:
-              description: A link to the metadata for this document
-              $ref: '#/components/schemas/HALLink'
+              $ref: '#/components/schemas/MetadataLink'
             versions:
-              description: A link to the list of versions of this document that are available
-              $ref: '#/components/schemas/HALLink'
+              $ref: '#/components/schemas/VersionsLink'
             content:
-              description: A link to the document contents
-              $ref: '#/components/schemas/HALLink'
+              $ref: '#/components/schemas/ContentLink'
         version:
           type: string
           description: The version string for this version of the document
@@ -111,7 +165,7 @@ components:
         file_description:
           type: object
           properties:
-            size_in_bytes: 
+            size_in_bytes:
               type: integer
               description: The size of the document in bytes
             name:
@@ -119,6 +173,109 @@ components:
               description: The original file name of the document
           required: ['size_in_bytes']
       required: ['_links', 'version', 'version_date', 'title', 'file_description']
+
+    MetadataLink:
+      allOf:
+        - $ref: '#/components/schemas/HALLink'
+        - description: A link to GET the metadata for this document
+        - properties:
+            href:
+              example: "https://bim.aconex.com/documents-api/documents/1879048400.cbf75754784c428da6c3043021585860/versions/793f227a9c2847969b7a845b95eb8a0f/metadata"
+
+    ContentLink:
+      allOf:
+        - $ref: '#/components/schemas/HALLink'
+        - description: A link to GET the file binary content for this document
+        - properties:
+            href:
+              example: "https://bim.aconex.com/bim/api/projects/1879048400/models/cbf75754784c428da6c3043021585860/revisions/793f227a9c2847969b7a845b95eb8a0f/contents"
+
+    VersionsLink:
+      allOf:
+        - $ref: '#/components/schemas/HALLink'
+        - description: A link to GET the list of versions of this document that are available
+        - properties:
+            href:
+              example: "https://bim.aconex.com/documents-api/documents/1879048400.cbf75754784c428da6c3043021585860/versions"
+
+    DocumentReferenceLink:
+      allOf:
+        - $ref: '#/components/schemas/HALLink'
+        - description: A link to GET the document reference
+        - properties:
+            href:
+              example: "https://bim.aconex.com/documents-api/documents/1879048400.cbf75754784c428da6c3043021585860/versions/793f227a9c2847969b7a845b95eb8a0f"
+
+    HALLink:
+      type: object
+      properties:
+        href:
+          type: string
+          description: The link to the resource (URL). Must be a fully qualified URL with scheme, host and path
+          example: "https://bim.aconex.com/link/to/resource"
+      required: ['href']
+
+    UploadSessionCreatedResponse:
+      type: object
+      properties:
+        _links:
+          description: Links to related resources
+          type: object
+          properties:
+            register-file-upload:
+              description: A link to register a file to upload
+              type: object
+              properties:
+                href:
+                  type: string
+                  example: 'https://bim.aconex.com/documents-api/upload-session/ecb02b2e-a050-41e9-80a8-f247ab1f317e/files'
+            upload-metadata:
+              description: A link for browser to enter metadata
+              type: object
+              properties:
+                href:
+                  type: string
+                  example: 'https://bim.aconex.com/cde/0.1/documents/upload-metadata/?upload_session_id=ecb02b2e-a050-41e9-80a8-f247ab1f317e'
+      required: ['_links']
+
+    UploadDocumentRequest:
+      type: object
+      properties:
+        file:
+          type: string
+          format: binary
+
+    RegisterFileRequest:
+      type: object
+      properties:
+        filename:
+          type: string
+          example: 'Office Arch.ifc'
+        size:
+          type: string
+          example: '4099307'
+        last_modified:
+          type: string
+          format: dateTime
+          example: '2019-11-04T04:46:55.880Z'
+        version:
+          $ref: '#/components/schemas/DocumentVersion'
+
+    RegisterFileResponse:
+      type: object
+      properties:
+        _links:
+          description: Links to related resources
+          type: object
+          properties:
+            upload-file:
+              description: A link to register a file to upload
+              type: object
+              properties:
+                href:
+                  type: string
+                  example: 'https://bim.aconex.com/documents-api/upload-session/57a5f29d-3b72-4c38-b0cd-ba843ee45d52/files/7bb1f522-fd85-488f-b005-e407cc1a78a6'
+      required: ['_links']
 
     DocumentMetadata:
       type: object
@@ -128,11 +285,9 @@ components:
           type: object
           properties:
             self:
-              description: A link to retrieve this metadata (must not be relative)
-              $ref: '#/components/schemas/HALLink'
+              $ref: '#/components/schemas/MetadataLink'
             documentReference:
-              description: A link to the document reference this metadata belongs to
-              $ref: '#/components/schemas/HALLink'
+              $ref: '#/components/schemas/DocumentReferenceLink'
       required: ['_links']
       additionalProperties:
         type: string
@@ -145,8 +300,9 @@ components:
           type: object
           properties:
             self:
-              description: A link to retrieve this reference (must not be relative)
-              $ref: '#/components/schemas/HALLink'
+              allOf:
+                - $ref: '#/components/schemas/HALLink'
+                - description: A link to retrieve this reference
         _embedded:
           description: Embedded resources
           type: object
