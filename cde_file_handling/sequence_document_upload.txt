@@ -1,14 +1,20 @@
-title Upload New Document
+title Upload Documents
 
-note over Client,Browser: Start upload document flow
-Client->Browser: BROWSER /cde/0.1/documents/upload/?callback_url=http://localhost/ClientCallback&filename=<filename>
-note over Browser,CDE: User enters required upload document fields
-Browser->CDE: Request upload document page
-CDE->Browser: CDE upload document revision page
-Browser->CDE: Populated upload document version fields
-CDE-->Browser: redirect (with CDE specific payload of upload fields)
-Browser-->Client: CDE payload (not inspected by client)
-note over Client,CDE: Upload the document
+participant Client
+participant Browser
+participant CDE
+
+note over Client,CDE: Start upload document flow
+Client->CDE: POST /cde/0.1/documents/upload-documents
+CDE-->Client: UploadSessionCreatedResponse (register-file-upload-link & upload-metadata-link)
+note over Client, CDE: User registers each file
+Client->CDE: POST /<register-file-upload-link>
+CDE-->Client: RegisterFileResponse (upload-file-link)
+note over Client,CDE: User enters required upload document fields for all registered documents
+Client->Browser: BROWSER /<upload-metadata-link>&callback_url=<callback-url>
+Browser<->CDE: User enters and submits metadata for all the documents
+Browser-->Client: Callback
+note over Client,CDE: Upload each document
 Client->CDE: POST /documents-api/documents (file binary and CDE payload)
 CDE->CDE: Persist document in CDE
-CDE->Client: Document reference
+CDE-->Client: Document reference
