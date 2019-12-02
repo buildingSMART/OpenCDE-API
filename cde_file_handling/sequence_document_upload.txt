@@ -15,6 +15,6 @@ Client->Browser: BROWSER /<upload-metadata-link>&callback_url=<callback-url>
 Browser<->CDE: User enters and submits metadata for all the documents
 Browser-->Client: Callback
 note over Client,CDE: Upload each document
-Client->CDE: POST /documents-api/documents (file binary and CDE payload)
+Client->CDE: POST /<upload-file-link> (file binary)
 CDE->CDE: Persist document in CDE
 CDE-->Client: Document reference
