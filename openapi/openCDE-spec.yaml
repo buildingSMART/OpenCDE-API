@@ -346,19 +346,3 @@ components:
         arrayType:
           $ref: '#/components/schemas/DataType'
       required: ['type', 'required']
-    
-    DataTypeWithName:
-      type: object
-      allOf:
-        - $ref: '#/components/schemas/DataType'
-        - type: object
-          properties:
-            name:
-              type: string
-      required: ['name']
-        
-        
-
-          
-          
-        
