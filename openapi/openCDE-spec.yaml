@@ -288,9 +288,18 @@ components:
               $ref: '#/components/schemas/MetadataLink'
             documentReference:
               $ref: '#/components/schemas/DocumentReferenceLink'
-      required: ['_links']
-      additionalProperties:
-        type: string
+        _metaData:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              value:
+                type: string
+              type:
+                $ref: '#/components/schemas/DataType'
+      required: ['_links', '_metaData']
 
     DocumentReferenceList:
       type: object
@@ -314,3 +323,26 @@ components:
                 $ref: '#/components/schemas/DocumentReference'
           required: ['documentReferenceList']
       required: ['_links', '_embedded']
+
+    DataType:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - string
+            - boolean
+            - date-time
+            - integer
+            - number
+            - enum
+            - array
+        required:
+          type: boolean
+        enumValues:
+          type: array
+          items:
+            type: string
+        arrayType:
+          $ref: '#/components/schemas/DataType'
+      required: ['type', 'required']
