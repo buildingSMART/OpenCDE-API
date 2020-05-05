@@ -1,14 +1,23 @@
 [
 	[
 		"Project name",
-		"Objective",
-		"Latest update",
-		"More info"
+		"OpenCDE API"
 	],
 	[
-		"openCDE API",
-		"Creating an open API definition",
-		"Prototype has been made",
+		"Objective",
+		"Creating an open API definition"
+	],
+	[
+		"Latest update",
+		"Prototype has been made"
+	],
+	[
+		"More info:",
 		"https://github.com/buildingSMART/OpenCDE-API"
 	]
 ]
+
+
+
+
+		
