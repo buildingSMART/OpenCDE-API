@@ -35,7 +35,7 @@
 
 # 1. Introduction
 
-This is 
+The BSI API Foundations includes a small number of services and a few conventions that are common to all APIs.  
 
 ## 1.1 Paging, Sorting and Filtering
 
