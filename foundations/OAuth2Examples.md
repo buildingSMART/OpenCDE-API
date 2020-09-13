@@ -10,13 +10,14 @@ To initiate the workflow, the client sends the user to the **"oauth2\_auth_url"*
 
 |parameter|value|
 |-------------|------|
-|response_type|`code` as string literal|
+|response_type|`code` as string literal| 
 |client_id|your client id|
 |state|unique user defined value|
+|redirect_url|The `redirect_url` registered for your client. This parameter is optional for OAUTH servers that don't support multiple redirect URLs|
 
 Example URL:
 
-    GET https://example.com/bsi/oauth2/auth?response_type=code&client_id=<your_client_id>&state=<user_defined_string>
+    GET https://example.com/bsi/oauth2/auth?response_type=code&client_id=<your_client_id>&state=<user_defined_string>&redirect_url=https://YourWebsite.com
 
 _On Windows operating systems, it is possible to open the systems default browser by using the url to start a new process._
 
