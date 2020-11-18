@@ -1,6 +1,6 @@
-# BSI API OAuth2 Example
+# Open CDE APIs OAuth2 Example
 
-This example describes an example OAuth2 workflow using the _Authorization Code Grant_ flow as per [section 4.1 of the OAuth2 specification](https://tools.ietf.org/html/rfc6749#section-4.1). Uris of required endpoints are assumed to have been obtained from the authentication resource as described in [section 2.2 of the BSI API specification](https://github.com/BuildingSMART/BCF-API#321-obtaining-authentication-information).
+This example describes an example OAuth2 workflow using the _Authorization Code Grant_ flow as per [section 4.1 of the OAuth2 specification](https://tools.ietf.org/html/rfc6749#section-4.1). Uris of required endpoints are assumed to have been obtained from the authentication resource as described in [section 2.2 of the Foundations API specification](README.md#221-obtaining-authentication-information).
 
 For this example, it is assumed that the client has been registered with the server in advance and has been issued valid credentials in the form of `client_id` and `client_secret`.
 
@@ -17,7 +17,7 @@ To initiate the workflow, the client sends the user to the **"oauth2\_auth_url"*
 
 Example URL:
 
-    GET https://example.com/bsi/oauth2/auth?response_type=code&client_id=<your_client_id>&state=<user_defined_string>&redirect_url=https://YourWebsite.com
+    GET https://example.com/opencde/oauth2/auth?response_type=code&client_id=<your_client_id>&state=<user_defined_string>&redirect_url=https://YourWebsite.com
 
 _On Windows operating systems, it is possible to open the systems default browser by using the url to start a new process._
 
@@ -33,7 +33,7 @@ If the user denies client access, there will be an `error` query parameter in th
 
 With the obtained _authorization code_, the client is able to request an access token from the server. The  **"oauth2\_token_url"** from the authentication resource is used to send token requests to, for example:
 
-    POST https://example.com/bsi/oauth2/token
+    POST https://example.com/opencde/oauth2/token
 
 **Parameters**
 
@@ -48,7 +48,7 @@ The POST request should be done via HTTP Basic Authorization with your applicati
 
 **Example Request**
 
-    POST https://example.com/bsi/oauth2/token?grant_type=authorization_code&code=<your_access_code>
+    POST https://example.com/opencde/oauth2/token?grant_type=authorization_code&code=<your_access_code>
 
 The access token will be returned as JSON in the response body and is an arbitrary string, guaranteed to not exceed 255 characters length.
 
@@ -69,7 +69,7 @@ The process to retrieve a refresh token is exactly the same as retrieving a toke
 
 **Example Request**
 
-    POST https://example.com/bsi/oauth2/token?grant_type=refresh_token&refresh_token=<your_refresh_token>
+    POST https://example.com/opencde/oauth2/token?grant_type=refresh_token&refresh_token=<your_refresh_token>
 
 The access token will be returned as JSON in the response body and is an arbitrary string, guaranteed to not exceed 255 characters length.
 
