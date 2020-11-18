@@ -25,7 +25,7 @@ Example redirected URL:
 
     https://YourWebsite.com/retrieveCode?code=<server_generated_code>&state=<user_defined_string>
 
-The BCF API server will ask the user to confirm that the client may access resources on his behalf. On authorization, the server redirects to an url that has been defined by the client author in advance. The generated `code` parameter will be appended as query parameter. Additionally, the `state` parameter is included in the redirection, it may be used to match server responses to client requests issued by your application.
+The Open CDE API server will ask the user to confirm that the client may access resources on his behalf. On authorization, the server redirects to an url that has been defined by the client author in advance. The generated `code` parameter will be appended as query parameter. Additionally, the `state` parameter is included in the redirection, it may be used to match server responses to client requests issued by your application.
 
 If the user denies client access, there will be an `error` query parameter in the redirection indicating an error reason as described in [section 4.1.2.1 of the OAuth2 specification](https://tools.ietf.org/html/rfc6749#section-4.1.2.1).
 
