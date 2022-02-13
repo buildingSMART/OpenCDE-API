@@ -1,0 +1,473 @@
+openapi: 3.0.0
+info:
+  title: OpenCDE Documents API
+  description: OpenCDE Documents API Specification
+  version: '1.0'
+paths:
+  /server-provided-path-document-metadata:
+    get:
+      description: This endpoint returns the metadata for a single document. It's url is retrieved from the links object in the initial document selection response, with the \'document_version_metadata\' property.
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentMetadata'
+  /server-provided-path-document-versions:
+    get:
+      description: This endpoint returns the versions for a single document. It's url is retrieved from the links object in the initial document selection response, with the \'document_versions\' property.
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentVersions'
+  /server-provided-path-document-version:
+    get:
+      description: This endpoint returns the document data for a single document. It's url is retrieved from the links object in the initial document selection response, with the \'document_version\' property.
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentVersion'
+  /server-provided-path-selected-documents-url:
+    get:
+      description: This endpoint returns the document selection. The client retrieves its url via the callback url from the server after the selection has finished. The url of this endpoint is retrieved from the callback sent to the client in a query parameter named selected_documents_url. In case when the user cancels the selection on the CDE UI, this callback will still be called, but the selected_documents_url query parameter will not be present, instead the server will provide a query parameter called user_cancelled_selection=true.
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SelectedDocuments'
+  /server-provided-path-upload-documents-url:
+    post:
+      description: This endpoint returns the document upload information. The client retrieves this url via the callback url from the server after the user's completion of the upload metadata entry. The url of this endpoint is retrieved from the callback sent to the client in a query parameter named upload_documents_url. In case when the user cancels the upload on the CDE UI, this callback will still be called, but the upload_documents_url query parameter will not be present, instead the server will provide a query parameter called user_cancelled_upload=true.
+      requestBody:
+        description: 'The client sends the list of files to be uploaded with this request. The file sizes are then used by the server to generate multiple upload parts, if required.'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UploadFileDetails'
+        required: true
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentsToUpload'
+        400:
+          description: 'This error may be returned if the file size exceeds the maximum length supported by the server.'
+  /server-provided-path-document-upload-file:
+    put:
+      description: This endpoint allows the client to upload the file content. The clients obtains this through the document upload information response.
+      requestBody:
+        content:
+          application/octet-stream:
+            schema:
+              type: string
+              format: binary
+      responses:
+        200:
+          description: ''
+  /server-provided-path-document-upload-completion:
+    post:
+      description: This endpoint must be called by the client when the file content upload has completed successfully. The clients obtains this through the document upload information response.
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentVersion'
+  /server-provided-path-document-upload-cancellation:
+    post:
+      description: This endpoint must be called by the client when the file content upload has been cancelled. The clients obtains this through the document upload information response.
+      responses:
+        204:
+          description: ''
+  /select-documents:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SelectDocuments'
+        required: true
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentDiscoverySessionInitialization'
+  /upload-documents:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UploadDocuments'
+        required: true
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentUploadSessionInitialization'
+components:
+  schemas:
+    DocumentMetadata:
+      type: object
+      additionalProperties: false
+      required:
+      - metadata
+      properties:
+        metadata:
+          type: array
+          items:
+            $ref: '#/components/schemas/DocumentMetadataEntry'
+    LinkData:
+      type: object
+      additionalProperties: false
+      required:
+      - url
+      properties:
+        url:
+          type: string
+          minLength: 1
+    UploadFilePartInstruction:
+      description: 'This model describes how a single part of a multipart file upload should be processed by the client. The upload links may only be valid for a specific time period, after which the links expire. Server vendors should make sure to have a reasonably long expiration date for clients to upload large files'
+      allOf:
+        - $ref: '#/components/schemas/LinkData'
+        - type: object
+          required:
+            - http_method
+            - content_range_start
+            - content_range_end
+          properties:
+            http_method:
+              type: string
+              enum: [POST, PUT]
+            additional_headers:
+              $ref: '#/components/schemas/Headers'
+            include_authorization:
+              description: 'Whether or not to include the default authorization of the CDE in the file upload request'
+              type: boolean
+              default: false
+            multipart_form_data:
+              description: 'Please note, that if a server supplies custom data here to be used in multipart requests, it is very likely that the server will also have to set a custom Content-Type header with the multipart/form-data type and a server-provided boundary'
+              $ref: '#/components/schemas/MultipartFormData'
+            content_range_start:
+              description: 'The inclusive start for this part'
+              type: integer
+              format: int64
+            content_range_end:
+              description: 'The inclusive end for this part'
+              type: integer
+              format: int64
+    MultipartFormData:
+      type: object
+      additionalProperties: false
+      required:
+        - prefix
+        - suffix
+      properties:
+        prefix:
+          description: 'This is a server provided value. Its value must be prefixed to the binary content body when uploading this part'
+          type: string
+          format: byte
+        suffix:
+          description: 'This is a server provided value. Its value must be suffixed to the binary content body when uploading this part. Typically, this is the end boundary for a multipart/form-data request'
+          type: string
+          format: byte
+    DocumentMetadataEntry:
+      type: object
+      additionalProperties: false
+      required:
+      - name
+      - value
+      - data_type
+      properties:
+        name:
+          type: string
+          minLength: 1
+        value:
+          type: array
+          items: 
+            type: string
+            minLength: 1
+        data_type:
+          type: string
+          enum:
+          - string
+          - boolean
+          - date-time
+          - date
+          - integer32
+          - integer64
+          - number
+          - url
+    DocumentVersions:
+      type: object
+      additionalProperties: false
+      required:
+      - documents
+      properties:
+        documents:
+          type: array
+          items:
+            $ref: '#/components/schemas/DocumentVersion'
+    SelectedDocuments:
+      type: object
+      additionalProperties: false
+      required:
+      - documents
+      properties:
+        selection_context:
+          type: string
+          nullable: true
+        documents:
+          type: array
+          items:
+            $ref: '#/components/schemas/DocumentVersion'
+    DocumentVersion:
+      type: object
+      additionalProperties: false
+      required:
+      - links
+      - version_number
+      - version_index
+      - creation_date
+      - title
+      - file_description
+      - document_id
+      properties:
+        links:
+          $ref: '#/components/schemas/DocumentVersionLinks'
+        version_number:
+          description: 'A human readable version number. This is not expected to be in any specific format across CDEs and may hold any value'
+          type: string
+          minLength: 1
+        version_index:
+          description: 'A machine readable sequence number of the version of the document. The sequence must be ordered, so that newer versions have higher values than previous ones. Each version index must be unique for that document, but there may be gaps in the sequence'
+          type: integer
+          format: int32
+        creation_date:
+          description: 'The creation date of the document revision'
+          type: string
+          format: date-time
+          minLength: 1
+        title:
+          type: string
+          minLength: 1
+        file_description:
+          $ref: '#/components/schemas/FileDescription'
+        document_id:
+          type: string
+          minLength: 1
+    DocumentVersionLinks:
+      type: object
+      additionalProperties: false
+      required:
+      - document_version
+      - document_version_metadata
+      - document_version_download
+      - document_versions
+      description: 'The document_details property represents an url that should be opened in the system browser. It leads to a page on the CDE where users can view or edit document details'
+      properties:
+        document_version:
+          $ref: '#/components/schemas/LinkData'
+        document_version_metadata:
+          $ref: '#/components/schemas/LinkData'
+        document_version_download:
+          $ref: '#/components/schemas/LinkData'
+        document_versions:
+          $ref: '#/components/schemas/LinkData'
+        document_details:
+          $ref: '#/components/schemas/LinkData'
+    FileDescription:
+      type: object
+      additionalProperties: false
+      required:
+      - name
+      - size_in_bytes
+      properties:
+        name:
+          type: string
+          minLength: 1
+        size_in_bytes:
+          type: integer
+          format: int64
+    DocumentDiscoverySessionInitialization:
+      type: object
+      additionalProperties: false
+      required:
+      - select_documents_url
+      - expires_in
+      properties:
+        select_documents_url:
+          type: string
+          minLength: 1
+        expires_in:
+          type: integer
+          format: int32
+    SelectDocuments:
+      type: object
+      additionalProperties: false
+      required:
+      - callback
+      properties:
+        callback:
+          $ref: '#/components/schemas/CallbackLink'
+        selection_context:
+          type: string
+          nullable: true
+    UploadFileDetails:
+      type: object
+      description: 'This object holds information about files to be uploaded. Each file in the array needs a file size so that the server can calculate the needed parts for a multipart upload. The session_file_id is used to identify the file.'
+      additionalProperties: false
+      required:
+      - files
+      properties:
+        files:
+          type: array
+          items:
+            $ref: '#/components/schemas/UploadFileDetail'
+    UploadFileDetail:
+      type: object
+      additionalProperties: false
+      required:
+      - size_in_bytes
+      - session_file_id
+      properties:
+        size_in_bytes:
+          type: integer
+          format: int64
+        session_file_id:
+          type: string
+          minLength: 1
+    UploadDocuments:
+      type: object
+      additionalProperties: false
+      required:
+      - callback
+      - files
+      properties:
+        callback:
+          $ref: '#/components/schemas/CallbackLink'
+        upload_context:
+          type: string
+          nullable: true
+        files:
+          type: array
+          items:
+            $ref: '#/components/schemas/FileToUpload'
+    FileToUpload:
+      type: object
+      additionalProperties: false
+      required:
+        - file_name
+        - session_file_id
+      properties:
+        file_name:
+          type: string
+          minLength: 1
+        session_file_id:
+          description: 'This is a client provided id to differentiate between multiple files that are being uploaded in the same session'
+          type: string
+          minLength: 1
+        document_id:
+          type: string
+          minLength: 1
+    DocumentUploadSessionInitialization:
+      type: object
+      additionalProperties: false
+      required:
+        - upload_ui_url
+        - expires_in
+        - max_size_in_bytes
+      properties:
+        upload_ui_url:
+          type: string
+          minLength: 1
+        expires_in:
+          type: integer
+          format: int32
+        max_size_in_bytes:
+          type: integer
+          format: int64
+    DocumentsToUpload:
+      type: object
+      additionalProperties: false
+      required:
+        - documents_to_upload
+      properties:
+        upload_context:
+          type: string
+          nullable: true
+        documents_to_upload:
+          type: array
+          items:
+            $ref: '#/components/schemas/DocumentToUpload'
+    DocumentToUpload:
+      type: object
+      additionalProperties: false
+      required:
+        - session_file_id
+        - upload_file_parts
+        - upload_completion
+        - upload_cancellation
+      properties:
+        session_file_id:
+          type: string
+          minLength: 1
+        upload_file_parts:
+          type: array
+          minLength: 1
+          items:
+            $ref: '#/components/schemas/UploadFilePartInstruction'
+        upload_completion:
+          $ref: '#/components/schemas/LinkData'
+        upload_cancellation:
+          $ref: '#/components/schemas/LinkData'
+    CallbackLink:
+      type: object
+      additionalProperties: false
+      required:
+      - url
+      - expires_in
+      properties:
+        url:
+          type: string
+          minLength: 1
+        expires_in:
+          type: integer
+          format: int32
+    Headers:
+      type: object
+      required:
+        - values
+      properties:
+        values:
+          type: array
+          items:
+            $ref: '#/components/schemas/HeaderValue'
+    HeaderValue:
+      type: object
+      required:
+      - name
+      - value
+      properties:
+        name:
+          type: string
+          minLength: 1
+        value:
+          type: string
+          minLength: 1
